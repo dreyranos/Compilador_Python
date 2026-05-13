@@ -13,6 +13,15 @@ Este é um compilador de projetos Python com interface gráfica premium desenvol
   - Hidden imports
 - **Terminal Integrado**: Acompanhe o processo de compilação em tempo real.
 
+## 📦 Gestão de Dependências
+
+O compilador gerencia as bibliotecas do seu projeto da seguinte forma:
+
+1.  **Detecção Automática**: O motor de compilação (PyInstaller) analisa seus comandos `import` e inclui automaticamente as bibliotecas necessárias.
+2.  **Vínculo com o Ambiente**: Ele utiliza as bibliotecas instaladas no ambiente Python onde o compilador está sendo executado. Certifique-se de que todas as dependências do seu projeto (ex: `pandas`, `requests`) estejam instaladas via `pip` antes de compilar.
+3.  **Hidden Imports**: Caso alguma biblioteca não seja detectada automaticamente (importações dinâmicas), você pode listá-las manualmente no campo **Hidden Imports** da interface, separadas por vírgula.
+4.  **Arquivos Não-Python**: Recursos como imagens, sons, ícones ou arquivos `.json` devem ser incluídos através do campo **Arquivos Extras** para que sejam empacotados dentro do `.exe`.
+
 ## 🛠️ Requisitos
 
 - Python 3.x
