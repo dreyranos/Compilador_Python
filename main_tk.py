@@ -51,6 +51,14 @@ class App(ctk.CTk):
         self.btn_assets = ctk.CTkButton(self.assets_frame, text="📎", width=40, command=self.pick_assets)
         self.btn_assets.pack(side="right")
 
+        # Requirements Selection
+        self.req_frame = ctk.CTkFrame(self.left_panel, fg_color="transparent")
+        self.req_frame.pack(fill="x", padx=20, pady=5)
+        self.entry_req = ctk.CTkEntry(self.req_frame, placeholder_text="requirements.txt (Opcional)")
+        self.entry_req.pack(side="left", fill="x", expand=True, padx=(0, 10))
+        self.btn_req = ctk.CTkButton(self.req_frame, text="📄", width=40, command=self.pick_req)
+        self.btn_req.pack(side="right")
+
         # Hidden Imports
         self.entry_hidden = ctk.CTkEntry(self.left_panel, placeholder_text="Hidden Imports (pandas, flask...)")
         self.entry_hidden.pack(fill="x", padx=20, pady=10)
@@ -58,10 +66,13 @@ class App(ctk.CTk):
         # Options
         self.switch_onefile = ctk.CTkSwitch(self.left_panel, text="Arquivo Único (.exe)")
         self.switch_onefile.select()
-        self.switch_onefile.pack(pady=10, padx=20, anchor="w")
+        self.switch_onefile.pack(pady=5, padx=20, anchor="w")
 
         self.switch_noconsole = ctk.CTkSwitch(self.left_panel, text="Ocultar Console (Windowed)")
-        self.switch_noconsole.pack(pady=10, padx=20, anchor="w")
+        self.switch_noconsole.pack(pady=5, padx=20, anchor="w")
+
+        self.switch_clean = ctk.CTkSwitch(self.left_panel, text="Ambiente Isolado (Venv + Auto-Clean)", text_color="#10b981")
+        self.switch_clean.pack(pady=5, padx=20, anchor="w")
 
         # Progress
         self.progress = ctk.CTkProgressBar(self.left_panel)
@@ -108,6 +119,12 @@ class App(ctk.CTk):
             self.entry_icon.delete(0, "end")
             self.entry_icon.insert(0, path)
 
+    def pick_req(self):
+        path = filedialog.askopenfilename(filetypes=[("Requirements", "*.txt")])
+        if path:
+            self.entry_req.delete(0, "end")
+            self.entry_req.insert(0, path)
+
     def pick_assets(self):
         paths = filedialog.askopenfilenames()
         if paths:
@@ -131,6 +148,10 @@ class App(ctk.CTk):
 
         data_list = [d.strip() for d in self.entry_assets.get().split(",") if d.strip()]
         hidden_list = [h.strip() for h in self.entry_hidden.get().split(",") if h.strip()]
+        
+        # New: Venv isolation logic
+        use_venv = self.switch_clean.get()
+        req_file = self.entry_req.get()
 
         cmd = self.engine.build_command(
             script_path=script,
@@ -141,7 +162,16 @@ class App(ctk.CTk):
             hidden_imports=hidden_list
         )
 
-        threading.Thread(target=lambda: self.engine.run_compilation(cmd), daemon=True).start()
+        def compile_thread():
+            if use_venv:
+                self.on_output(">>> Iniciando Modo Ambiente Isolado...\n")
+                # Add logic to create venv and install requirements if needed
+                # For simplicity in MVP, the engine can handle this or we can pass it
+                pass
+            
+            self.engine.run_compilation(cmd, use_venv=use_venv, req_path=req_file)
+
+        threading.Thread(target=compile_thread, daemon=True).start()
 
 if __name__ == "__main__":
     app = App()

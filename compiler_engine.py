@@ -49,10 +49,34 @@ class CompilerEngine:
         
         return cmd
 
-    def run_compilation(self, command: List[str]):
+    def run_compilation(self, command: List[str], use_venv: bool = False, req_path: str = None):
+        temp_dir = None
         try:
+            if use_venv:
+                import tempfile
+                import shutil
+                import venv
+                
+                temp_dir = tempfile.mkdtemp(prefix="py_comp_venv_")
+                self.on_output(f">>> Criando ambiente virtual em: {temp_dir}\n")
+                venv.create(temp_dir, with_pip=True)
+                
+                # Path to venv python/pip
+                python_exe = os.path.join(temp_dir, "Scripts", "python.exe")
+                pip_exe = os.path.join(temp_dir, "Scripts", "pip.exe")
+                
+                self.on_output(">>> Instalando PyInstaller no ambiente isolado...\n")
+                subprocess.run([pip_exe, "install", "pyinstaller"], check=True, capture_output=True)
+                
+                if req_path and os.path.exists(req_path):
+                    self.on_output(f">>> Instalando dependências de: {req_path}\n")
+                    subprocess.run([pip_exe, "install", "-r", req_path], check=True, capture_output=True)
+                
+                # Update command to use venv python
+                # command looks like ['python', '-m', 'PyInstaller', ...]
+                command[0] = python_exe
+                
             self.on_output(f"Comando: {' '.join(command)}\n\n")
-            # Using subprocess.PIPE and monitoring it
             self.process = subprocess.Popen(
                 command,
                 stdout=subprocess.PIPE,
@@ -69,9 +93,19 @@ class CompilerEngine:
             
             return_code = self.process.wait()
             self.on_finished(return_code)
+            
         except Exception as e:
             self.on_output(f"\nERRO: {str(e)}\n")
             self.on_finished(1)
+        finally:
+            if temp_dir and os.path.exists(temp_dir):
+                self.on_output("\n>>> Limpando ambiente isolado...\n")
+                try:
+                    import shutil
+                    shutil.rmtree(temp_dir)
+                    self.on_output(">>> Limpeza concluída.\n")
+                except Exception as e:
+                    self.on_output(f">>> Erro na limpeza: {e}\n")
 
     def stop(self):
         if self.process:

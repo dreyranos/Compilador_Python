@@ -15,12 +15,11 @@ Este é um compilador de projetos Python com interface gráfica premium desenvol
 
 ## 📦 Gestão de Dependências
 
-O compilador gerencia as bibliotecas do seu projeto da seguinte forma:
-
-1.  **Detecção Automática**: O motor de compilação (PyInstaller) analisa seus comandos `import` e inclui automaticamente as bibliotecas necessárias.
-2.  **Vínculo com o Ambiente**: Ele utiliza as bibliotecas instaladas no ambiente Python onde o compilador está sendo executado. Certifique-se de que todas as dependências do seu projeto (ex: `pandas`, `requests`) estejam instaladas via `pip` antes de compilar.
-3.  **Hidden Imports**: Caso alguma biblioteca não seja detectada automaticamente (importações dinâmicas), você pode listá-las manualmente no campo **Hidden Imports** da interface, separadas por vírgula.
-4.  **Arquivos Não-Python**: Recursos como imagens, sons, ícones ou arquivos `.json` devem ser incluídos através do campo **Arquivos Extras** para que sejam empacotados dentro do `.exe`.
+1.  **Detecção Automática**: O PyInstaller analisa seus imports e inclui as bibliotecas.
+2.  **Modo Ambiente Isolado (Novo! 🚀)**: Você pode ativar esta opção para que o compilador crie um ambiente virtual (`venv`) temporário, instale apenas as dependências necessárias (via `requirements.txt`) e compile o projeto de forma limpa. Ao finalizar, o ambiente é excluído automaticamente, mantendo seu sistema limpo.
+3.  **Vínculo com o Ambiente**: Se o modo isolado estiver desativado, ele utiliza as bibliotecas instaladas no seu Python global.
+4.  **Hidden Imports**: Para bibliotecas não detectadas automaticamente.
+5.  **Arquivos Não-Python**: Recursos extras (imagens, JSON) devem ser incluídos no campo **Arquivos Extras**.
 
 ## 🛠️ Requisitos
 
